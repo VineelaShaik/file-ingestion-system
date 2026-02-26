@@ -1,0 +1,21 @@
+full_name,email,phone,city
+John Doe,john.doe1@gmail.com,9876543210,Bangalore
+Al,alice.smith@gmail.com,9123456780,Hyderabad
+Rahul Verma,rahul.vermagmail.com,9988776655,Delhi
+Priya Sharma,priya.sharma@gmail.com,9012345678,Mumbai
+Arjun Nayak,arjun.nayak@gmail.com,8899776655,Chennai
+Neha Kapoor,neha.kapoorgmail.com,9090909090,Pune
+Vi,vikas.sharma@gmail.com,9876501234,Kolkata
+Rohit Mehta,rohit.mehta@gmail.com,9123091230,Ahmedabad
+Sneha Reddy,sneha.reddy@gmail.com,9345678901
+Karan Malhotra,karan.m@gmail.com,9988123456,Jaipur
+An,ankit.jain@gmail.com,9876540987,Indore
+Manish Kumar,manish.kumar@gmail.com,9098765432,Patna
+Divya Nair,divya.nairgmail.com,9191919191,Kochi
+Ramesh Gupta,ramesh.gupta@gmail.com,9898989898,Lucknow
+Si,simran.kaur@gmail.com,9345612789,Chandigarh
+Amit Patel,amit.patel@gmail.com,9871234560,Surat
+Nikhil Rao,nikhil.rao@gmail.com,9123456701,Bangalore
+De,deepika.shah@gmail.com,9012340000,Mumbai
+Harsh Vardhan,harsh.vgmail.com,9988771100,Noida
+Tarun Arora,tarun.arora@gmail.com,9988001122
