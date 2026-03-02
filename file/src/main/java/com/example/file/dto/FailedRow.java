@@ -1,5 +1,4 @@
 package com.example.file.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

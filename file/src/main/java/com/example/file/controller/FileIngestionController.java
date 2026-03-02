@@ -1,8 +1,11 @@
 package com.example.file.controller;
 
-import com.example.file.dto.FailedRow;
+import com.example.file.entity.FailedRow;
 
-import com.example.file.dto.IngestionResult;
+import com.example.file.entity.IngestionLog;
+import com.example.file.entity.IngestionResult;
+import com.example.file.repository.IngestionLogRepository;
+import com.example.file.repository.IngestionResultRepository;
 import com.example.file.service.FileIngestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/ingest")
 @RequiredArgsConstructor
@@ -28,7 +32,8 @@ public class FileIngestionController {
     private final JobLauncher jobLauncher;
     private final Job userIngestionJob;
     private final FileIngestionService fileIngestionService;
-//    private final IngestionLogRepository ingestionLogRepository;
+    private final IngestionResultRepository ingestionResultRepository;
+    private final IngestionLogRepository ingestionLogRepository;
 
     @PostMapping("/upload/multiple")
     public ResponseEntity<List<IngestionResult>> uploadMultiple(
@@ -36,6 +41,7 @@ public class FileIngestionController {
             throws Exception {
 
         List<IngestionResult> results = new ArrayList<>();
+        IngestionResult result;
 
         for (MultipartFile file : files) {
 
@@ -65,23 +71,33 @@ public class FileIngestionController {
 
             long failedCount = failedRows.size();
             long totalCount = successCount + failedCount;
-            failedRows.sort(Comparator.comparingInt(FailedRow::getRow));
-            results.add(new IngestionResult(
+            failedRows.sort(Comparator.comparingInt(FailedRow::getRowNum));
+            result= new IngestionResult(
                     file.getOriginalFilename(),
                     totalCount,
                     successCount,
                     failedCount,
-                    failedRows,
-                    LocalDateTime.now()
-            ));
+                    failedRows
+            );
+            for (FailedRow row : failedRows) {
+                row.setIngestionResult(result);
+            }
+            results.add(result);
 
         }
+
+        IngestionLog log=new IngestionLog(results);
+        for (IngestionResult res : results) {
+            res.setIngestionLog(log);
+        }
+        ingestionLogRepository.save(log);
+
 
         return ResponseEntity.ok(results);
     }
 
     @PostMapping("/upload/single")
-    public ResponseEntity<IngestionResult> uploadSingle(
+    public ResponseEntity<List<IngestionResult>> uploadSingle(
             @RequestParam("file") MultipartFile file)
             throws Exception {
     IngestionResult result;
@@ -111,17 +127,26 @@ public class FileIngestionController {
 
             long failedCount = failedRows.size();
             long totalCount = successCount + failedCount;
-            failedRows.sort(Comparator.comparingInt(FailedRow::getRow));
+            failedRows.sort(Comparator.comparingInt(FailedRow::getRowNum));
             result= new IngestionResult(
                     file.getOriginalFilename(),
                     totalCount,
                     successCount,
                     failedCount,
-                    failedRows,
-                    LocalDateTime.now()
+                    failedRows
             );
+        for (FailedRow row : failedRows) {
+            row.setIngestionResult(result);
+        }
+        ArrayList<IngestionResult> results = new ArrayList<>();
+        results.add(result);
+        IngestionLog log=new IngestionLog(results);
+        for (IngestionResult res : results) {
+            res.setIngestionLog(log);
+        }
+            ingestionLogRepository.save(log);
 
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(results);
     }
 }

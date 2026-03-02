@@ -1,6 +1,6 @@
 package com.example.file.batch;
 
-import com.example.file.dto.FailedRow;
+import com.example.file.entity.FailedRow;
 import com.example.file.dto.ParseRow;
 import org.springframework.batch.core.SkipListener;
 import com.example.file.dto.UserWithRow;
