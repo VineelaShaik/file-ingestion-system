@@ -3,11 +3,12 @@ package com.example.file.batch;
 import com.example.file.Exception.ValidationException;
 import com.example.file.dto.ParseRow;
 import com.example.file.dto.UserWithRow;
-import com.example.file.entity.User;
 import com.example.file.validation.ValidateUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -33,3 +34,4 @@ public class UserProcessor implements ItemProcessor<ParseRow, UserWithRow> {
         return new UserWithRow(parseRow.getRow(), parseRow.getUser());
     }
 }
+

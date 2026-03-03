@@ -69,7 +69,7 @@ public class UserSkipListener implements SkipListener<ParseRow, UserWithRow> {
         failedRows.add(
                 new FailedRow(
                         item.getRow(),
-                        "Write error: " + t.getMessage()
+                        t.getMessage()
                 )
         );
 

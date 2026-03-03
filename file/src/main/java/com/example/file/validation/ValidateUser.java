@@ -8,16 +8,16 @@ import java.util.Objects;
 @Component
 public class ValidateUser {
     public String validate( int row,User user){
-        if(Objects.equals(user.getFullName(), "") ||(user.getFullName().length()<3))
+        if(!Objects.equals(user.getFullName(), "") && (user.getFullName().length()<3))
             return ("Invalid name");
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+        if (user.getEmail() != null && !user.getEmail().contains("@")) {
             return "Invalid email";
         }
-        if (user.getPhone() == null ||
+        if (user.getPhone() != null &&
                 !user.getPhone().matches("\\d{10}")) {
             return "Invalid phone number";
         }
-        if (user.getCity() == null || user.getCity().isBlank()) {
+        if (user.getCity() != null && user.getCity().isBlank()) {
             return "City is missing";
         }
         return null;

@@ -31,6 +31,7 @@ public class FileIngestionController {
 
     private final JobLauncher jobLauncher;
     private final Job userIngestionJob;
+    private final Job mappedIngestionJob;
     private final FileIngestionService fileIngestionService;
     private final IngestionResultRepository ingestionResultRepository;
     private final IngestionLogRepository ingestionLogRepository;
@@ -145,6 +146,61 @@ public class FileIngestionController {
             res.setIngestionLog(log);
         }
             ingestionLogRepository.save(log);
+
+
+        return ResponseEntity.ok(results);
+    }
+    @PostMapping("/upload/mapped")
+    public ResponseEntity<List<IngestionResult>> uploadMapped(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("mapping") String mappingJson
+    ) throws Exception {
+        IngestionResult result;
+
+        String filePath = fileIngestionService.save(file);
+
+        JobParameters params = new JobParametersBuilder()
+                .addString("filePath", filePath)
+                .addString("mapping", mappingJson)
+                .addLong("time", System.currentTimeMillis())
+                .toJobParameters();
+
+        JobExecution execution= jobLauncher.run(mappedIngestionJob, params);
+
+        StepExecution stepExecution =
+                execution.getStepExecutions().iterator().next();
+
+        long successCount = stepExecution.getWriteCount();
+
+        List<FailedRow> failedRows =
+                (List<FailedRow>) stepExecution
+                        .getExecutionContext()
+                        .get("failedRows");
+
+        if (failedRows == null) {
+            failedRows = new ArrayList<>();
+        }
+
+        long failedCount = failedRows.size();
+        long totalCount = successCount + failedCount;
+        failedRows.sort(Comparator.comparingInt(FailedRow::getRowNum));
+        result= new IngestionResult(
+                file.getOriginalFilename(),
+                totalCount,
+                successCount,
+                failedCount,
+                failedRows
+        );
+        for (FailedRow row : failedRows) {
+            row.setIngestionResult(result);
+        }
+        ArrayList<IngestionResult> results = new ArrayList<>();
+        results.add(result);
+        IngestionLog log=new IngestionLog(results);
+        for (IngestionResult res : results) {
+            res.setIngestionLog(log);
+        }
+        ingestionLogRepository.save(log);
 
 
         return ResponseEntity.ok(results);

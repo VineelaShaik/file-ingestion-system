@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Map;
+
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
@@ -49,4 +51,32 @@ public class BatchConfig {
                 .listener(skipListener)
                 .build();
     }
+    @Bean
+    public Job mappedIngestionJob(Step mappedIngestionStep){
+        return new JobBuilder("MappedIngestionJob",jobRepository)
+                .start(mappedIngestionStep)
+                .build();
+    }
+    @Bean
+    public Step mappedIngestionStep(FlatFileItemReader<ParseRow> mappedReader,
+                           UserProcessor processor,
+                           UserWriter userWriter,
+                           UserSkipListener skipListener,
+                           PlatformTransactionManager transactionManager
+                           ){
+        return new StepBuilder("mappedIngestionStep",jobRepository)
+                .<ParseRow,UserWithRow>chunk(10, transactionManager)
+                .reader(mappedReader)
+                .processor(processor)
+                .writer(userWriter)
+                .faultTolerant()
+                .skip(FlatFileParseException.class)
+                .skip(ValidationException.class)
+                .skip(DuplicateUserException.class)
+                .skipLimit(1000)
+                .listener(skipListener)
+                .build();
+
+    }
+
 }
