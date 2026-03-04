@@ -9,6 +9,9 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.transform.FieldSet;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,16 +33,22 @@ public class CsvReaderConfig {
         FlatFileItemReader<ParseRow> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(filePath));
         reader.setLinesToSkip(1);
+        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+        tokenizer.setDelimiter(",");
+        tokenizer.setStrict(false);
 
         reader.setLineMapper((line, lineNumber) -> {
 
-            String[] tokens = line.split(",");
+            FieldSet fieldSet = tokenizer.tokenize(line);
 
             User user = new User();
-            user.setFullName(tokens[0].trim());
-            user.setEmail(tokens[1].trim());
-            user.setPhone(tokens[2].trim());
-            user.setCity(tokens[3].trim());
+
+            BeanWrapper wrapper = new BeanWrapperImpl(user);
+
+            wrapper.setPropertyValue("fullName", fieldSet.readString(0).trim());
+            wrapper.setPropertyValue("email", fieldSet.readString(1).trim());
+            wrapper.setPropertyValue("phone", fieldSet.readString(2).trim());
+            wrapper.setPropertyValue("city", fieldSet.readString(3).trim());
 
             return new ParseRow(lineNumber, user);
         });
@@ -83,12 +92,17 @@ public class CsvReaderConfig {
 
         reader.setResource(new FileSystemResource(filePath));
         reader.setLinesToSkip(1);
+        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+        tokenizer.setDelimiter(",");
+        tokenizer.setStrict(false);
 
         reader.setLineMapper((line, lineNumber) -> {
 
-            String[] values = line.split(",");
+            FieldSet fieldSet = tokenizer.tokenize(line);
 
             User user = new User();
+
+            BeanWrapper wrapper = new BeanWrapperImpl(user);
 
             for (Map.Entry<String, String> entry : mapping.entrySet()) {
 
@@ -97,23 +111,14 @@ public class CsvReaderConfig {
 
                 Integer index = headerIndexMap.get(fileColumn);
 
-                if (index != null && index < values.length) {
+                if (index != null) {
 
-                    String value = values[index];
+                    String value = fieldSet.readString(index);
 
-                    switch (dbField) {
-                        case "full_name":
-                            user.setFullName(value);
-                            break;
-                        case "email":
-                            user.setEmail(value);
-                            break;
-                        case "phone":
-                            user.setPhone(value);
-                            break;
-                        case "city":
-                            user.setCity(value);
-                            break;
+                    try {
+                        wrapper.setPropertyValue(dbField, value);
+                    } catch (Exception e) {
+                        System.out.println("Field mapping error: " + dbField);
                     }
                 }
             }

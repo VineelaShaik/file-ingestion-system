@@ -8,7 +8,7 @@ import java.util.Objects;
 @Component
 public class ValidateUser {
     public String validate( int row,User user){
-        if(!Objects.equals(user.getFullName(), "") && (user.getFullName().length()<3))
+        if(user.getFullName()!=null && (user.getFullName().length()<3))
             return ("Invalid name");
         if (user.getEmail() != null && !user.getEmail().contains("@")) {
             return "Invalid email";
