@@ -18,8 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -158,7 +161,7 @@ public class FileIngestionController {
         IngestionResult result;
 
         String filePath = fileIngestionService.save(file);
-
+        System.out.println(mappingJson);
         JobParameters params = new JobParametersBuilder()
                 .addString("filePath", filePath)
                 .addString("mapping", mappingJson)
@@ -204,5 +207,19 @@ public class FileIngestionController {
 
 
         return ResponseEntity.ok(results);
+    }
+    @PostMapping("/headers")
+    public List<String> getHeaders(@RequestParam("file") MultipartFile file) throws Exception {
+
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(file.getInputStream()));
+
+        String headerLine = reader.readLine();
+
+        if (headerLine == null) {
+            throw new RuntimeException("Empty file");
+        }
+        System.out.println(headerLine);
+        return Arrays.asList(headerLine.split(","));
     }
 }

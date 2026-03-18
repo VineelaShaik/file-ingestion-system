@@ -1,0 +1,6 @@
+full_name,email,phone,city
+jhon,john.doe@gmail.com,9876543210,Bangalore
+Alice Smith,alice.smith@gmail.com,9123456780,Hyderabad
+Rahul Vermagma,il.com,9988776655,Delhi
+Priya Sharma,priya.sharma@gmail.com,9012345678,Mumbai
+Arjun Nayak,arjun.nayak@gmail.com,8899776655,Chennai

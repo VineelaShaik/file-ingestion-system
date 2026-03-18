@@ -15,11 +15,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String FullName;
+    private String fullName;
     @Column (unique = true)
     private String email;
     private String phone;
     private String city;
+    private Double totalSalary;
 
     private LocalDateTime createdAt;
 
