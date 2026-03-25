@@ -53,80 +53,7 @@ public class CsvReaderConfig {
         });
         return reader;
 }
-//    @Bean
-//    @StepScope
-//    public FlatFileItemReader<ParseRow> mappedReader(
-//            @Value("#{jobParameters['filePath']}") String filePath,
-//            @Value("#{jobParameters['mapping']}") String mappingJson
-//    ) {
-//        ObjectMapper mapper = new ObjectMapper();
-//
-//        Map<String, String> mapping;
-//
-//        try {
-//            mapping = mapper.readValue(mappingJson, Map.class);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Invalid mapping JSON", e);
-//        }
-//
-//        System.out.println("Mapping received: " + mapping);
-//        Map<String, Integer> headerIndexMap = new HashMap<>();
-//        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-//
-//            String headerLine = br.readLine();
-//            String[] headers = headerLine.split(",");
-//
-//            for (int i = 0; i < headers.length; i++) {
-//                headerIndexMap.put(headers[i].trim(), i);
-//            }
-//
-//            System.out.println("Header Index Map: " + headerIndexMap);
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("Error reading header", e);
-//        }
-//
-//        FlatFileItemReader<ParseRow> reader =
-//                new FlatFileItemReader<>();
-//
-//        reader.setResource(new FileSystemResource(filePath));
-//        reader.setLinesToSkip(1);
-//        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-//        tokenizer.setDelimiter(",");
-//        tokenizer.setStrict(false);
-//
-//        reader.setLineMapper((line, lineNumber) -> {
-//
-//            FieldSet fieldSet = tokenizer.tokenize(line);
-//
-//            User user = new User();
-//
-//            BeanWrapper wrapper = new BeanWrapperImpl(user);
-//
-//            for (Map.Entry<String, String> entry : mapping.entrySet()) {
-//
-//                String dbField = entry.getKey();
-//                String fileColumn = entry.getValue();
-//
-//                Integer index = headerIndexMap.get(fileColumn);
-//
-//                if (index != null) {
-//
-//                    String value = fieldSet.readString(index);
-//
-//                    try {
-//                        wrapper.setPropertyValue(dbField, value);
-//                    } catch (Exception e) {
-//                        System.out.println("Field mapping error: " + dbField);
-//                    }
-//                }
-//            }
-//
-//            return new ParseRow(lineNumber, user);
-//        });
-//
-//        return reader;
-//    }
+
 @Bean
 @StepScope
 public FlatFileItemReader<ParseRow> mappedReader(
@@ -177,23 +104,19 @@ public FlatFileItemReader<ParseRow> mappedReader(
             String resolved;
 
             if (value instanceof String) {
-                // single mapping — "fullName": "name_col"
                 String fileColumn = (String) value;
                 Integer index = headerIndexMap.get(fileColumn);
                 if (index == null) continue;
                 resolved = fieldSet.readString(index);
 
             } else if (value instanceof Map) {
-                // multi-field formula — "fullName": { sources: [...], formula: "..." }
-                @SuppressWarnings("unchecked")
+
                 Map<String, Object> formulaMap = (Map<String, Object>) value;
 
                 String formula = (String) formulaMap.get("formula");
 
-                @SuppressWarnings("unchecked")
                 List<String> sources = (List<String>) formulaMap.get("sources");
 
-                // substitute {token} → actual cell value
                 for (String src : sources) {
                     Integer index = headerIndexMap.get(src);
                     String cellValue = (index != null) ? fieldSet.readString(index) : "";
@@ -230,7 +153,6 @@ public FlatFileItemReader<ParseRow> mappedReader(
             }
         }
 
-        // string concat — split on +, strip quotes, join
         String[] parts = trimmed.split("\\+");
         StringBuilder sb = new StringBuilder();
         for (String part : parts) {

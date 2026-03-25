@@ -20,7 +20,7 @@ public class User {
     private String email;
     private String phone;
     private String city;
-    private Double totalSalary;
+    private Double  totalSalary;
 
     private LocalDateTime createdAt;
 
