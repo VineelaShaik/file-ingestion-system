@@ -65,7 +65,7 @@ public class BatchConfig {
                            PlatformTransactionManager transactionManager
                            ){
         return new StepBuilder("mappedIngestionStep",jobRepository)
-                .<ParseRow,UserWithRow>chunk(10, transactionManager)
+                .<ParseRow,UserWithRow>chunk(1000, transactionManager)
                 .reader(mappedReader)
                 .processor(processor)
                 .writer(userWriter)

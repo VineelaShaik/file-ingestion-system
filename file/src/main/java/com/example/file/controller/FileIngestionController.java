@@ -20,11 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -170,6 +168,7 @@ public class FileIngestionController {
 
         JobExecution execution= jobLauncher.run(mappedIngestionJob, params);
 
+
         StepExecution stepExecution =
                 execution.getStepExecutions().iterator().next();
 
@@ -204,6 +203,23 @@ public class FileIngestionController {
             res.setIngestionLog(log);
         }
         ingestionLogRepository.save(log);
+        LocalDateTime start = execution.getStartTime();
+        LocalDateTime end = execution.getEndTime();
+
+        long durationMs = Duration.between(start, end).toMillis();
+        double durationSec = durationMs / 1000.0;
+
+        long totalRecords = successCount + failedCount;
+
+        double throughput = totalRecords / durationSec;
+
+
+        double latency = durationSec;
+
+        System.out.println("----- PERFORMANCE -----");
+        System.out.println("Total Records: " + totalRecords);
+        System.out.println("Time Taken: " + durationSec + " sec");
+        System.out.println("Throughput: " + throughput + " records/sec");
 
 
         return ResponseEntity.ok(results);
